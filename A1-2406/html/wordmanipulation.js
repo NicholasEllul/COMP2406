@@ -135,32 +135,28 @@ function handleKeyUp(e){
 function handleSubmitButton () {
 
     var userText = $('#userTextField').val(); //get text from user text input field
+
     if(userText && userText != ''){
         //user text was not empty
 
-        let textDiv = document.getElementById("text-area")
-        textDiv.innerHTML = textDiv.innerHTML + `<p> ${userText}</p>`
+        // Reset on screen text
+        let textDiv = document.getElementById("text-area");
+        textDiv.innerHTML =  `<p> </p>`
+        words = [];
 
         var userRequestObj = {text: userText}; //make object to send to server
         var userRequestJSON = JSON.stringify(userRequestObj); //make json string
         $('#userTextField').val(''); //clear the user text field
 
-        //Prepare a POST message for the server and a call back function
-        //to catch the server repsonse.
-        //alert ("You typed: " + userText);
-        $.post("userText", userRequestJSON, function(data, status){
+        $.post("userText", userRequestJSON, function(data, status){            
 
             console.log("data: " + data);
             console.log("typeof: " + typeof data);
-
+            
             var context = canvas.getContext('2d');
             var responseObj = JSON.parse(data);
-
-            let textDiv = document.getElementById("text-area")
-            textDiv.innerHTML =  `<p> </p>`
-
-            words = [];
-
+            
+            textDiv.innerHTML = textDiv.innerHTML + `<p> ${userText}</p>`;
             let yValue = 30;
             for(line of responseObj.lyricsArray){
                 let xValue = 20;
