@@ -158,6 +158,7 @@ function handleSubmitButton () {
             var responseObj = JSON.parse(data);
             
             let textDiv = document.getElementById("text-area")
+            textDiv.innerHTML =  `<p> </p>`
             
             words = [];
 
