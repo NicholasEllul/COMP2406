@@ -17,10 +17,10 @@ var canvas = document.getElementById('canvas1'); //our drawing canvas
 
 function getWordAtLocation(aCanvasX, aCanvasY){
     // This function loops though all the movable text, and returns the one thats being clicked
-    
+
     var context = canvas.getContext('2d');
     context.font = '15pt Arial';
-    
+
     for(var i=0; i<words.length; i++){
 
         let wordWidth = context.measureText(words[i].word).width;
@@ -118,7 +118,6 @@ function handleMouseUp(e){
 
 
 //KEY CODES
-//should clean up these hard coded key codes
 var ENTER = 13;
 
 function handleKeyUp(e){
@@ -150,43 +149,43 @@ function handleSubmitButton () {
         //to catch the server repsonse.
         //alert ("You typed: " + userText);
         $.post("userText", userRequestJSON, function(data, status){
-            
+
             console.log("data: " + data);
             console.log("typeof: " + typeof data);
-            
+
             var context = canvas.getContext('2d');
             var responseObj = JSON.parse(data);
-            
+
             let textDiv = document.getElementById("text-area")
             textDiv.innerHTML =  `<p> </p>`
-            
+
             words = [];
 
             let yValue = 30;
             for(line of responseObj.lyricsArray){
                 let xValue = 20;
-                
+
                 //Write the line of lyrics beneath the search box
                 textDiv.innerHTML = textDiv.innerHTML + `<p> ${line}</p>`
-                
+
                 // Dont bother wasting time on an empty line.
                 if(line.length === 0) continue;
-                
+
                 let wordsInLine = line.split(/\s/);
 
-                
+
                 // Iterate over each word in the line
                 for(aWord of wordsInLine){
                     let chordsInThisWord = 0;
                     let widthChordsNeed = 0;
-                     
+
                     // Strip the words of their embedded chords and add them to the array to be drawn
                     while (aWord.indexOf('[') > -1 && (aWord.length - 1 > (aWord.indexOf(']') - aWord.indexOf('[')))  ){
                         chordsInThisWord += 1;
 
                         let chord = '';
                         let indexOfChord = aWord.indexOf('[');
-                        
+
                         // Strip out the chord from the word
                         chord = aWord.substring(indexOfChord,aWord.indexOf(']')+1);
                         aWord = aWord.replace(/\b\[.+?\]|\[.+?\]\b|\[.+?\]/, '');
@@ -195,19 +194,17 @@ function handleSubmitButton () {
                         let xOffset = (indexOfChord * context.measureText(aWord.substring(0,indexOfChord)).width /
                                        (indexOfChord + 1)) - context.measureText(chord).width /2;
 
-                        // Add the chords width to a variable used for spacing if there are many embedded chords
                         let chordWidth = context.measureText(chord).width;
                         widthChordsNeed += chordWidth;
-                        
+
                         // Offset the chord spacing if there are multiple chords so that they dont bunch up 
                         if(chordsInThisWord > 1) xOffset += chordWidth * (chordsInThisWord - 1);
-                
-                        // Create and push the JSON object
+
                         words.push({word:chord, x:xValue+xOffset, y:yValue-25});
                     }
-                    
+
                     words.push({word: aWord, x:xValue, y:yValue});
-                    
+
                     // Calculate spacing after word
                     xValue += 10 + context.measureText(aWord).width;
                     if(chordsInThisWord > 1) xValue += widthChordsNeed/2 + 10;
