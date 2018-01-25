@@ -90,7 +90,7 @@ http
         fs.readFile(filePath, function(err,data){
             if (err) {
                 //report error to console
-                console.log("ERROR: " + JSON.stringify(err));
+                console.log("ERROR: Song not found." );
                 //respond with not found 404 to client
                 response.writeHead(404);
                 response.end(JSON.stringify(err));
@@ -128,4 +128,4 @@ http
   })
   .listen(3000);
 
-console.log("Server Running at http://127.0.0.1:3000  CNTL-C to quit");
+console.log("Server Running at http://localhost:3000/  CNTL-C to quit");
