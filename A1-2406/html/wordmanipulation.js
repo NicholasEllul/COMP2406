@@ -1,27 +1,30 @@
-// Made by Nicholas Ellu; - 101064168
-// Made for COMP 2406 Assignment 1
+/*
+Made by Nicholas Ellul - 101064168 and Peter Khlopenkov - 101072312
+Made for COMP 2406 Assignment 1
 
-// This JS file was based on tutorial 2.
-// It requests an array of song lyrics where each element is a line of the song.
-// This file strips the words and writes them to the screen.
+This JS file was based on tutorial 2.
+It requests an array of song lyrics where each element is a line of the song.
+This file strips the words and writes them to the screen.
 
-//Use javascript array of objects to represent words and their locations
-var words = [];
-var chords = [];
-var timer;
+Use javascript array of objects to represent words and their locations
+*/
 
-var wordBeingMoved;
+let words = [];
+let chords = [];
+let timer;
 
-var deltaX, deltaY; //location where mouse is pressed
-var canvas = document.getElementById('canvas1'); //our drawing canvas
+let wordBeingMoved;
+
+let deltaX, deltaY; //location where mouse is pressed
+let canvas = document.getElementById('canvas1'); //our drawing canvas
 
 function getWordAtLocation(aCanvasX, aCanvasY){
     // This function loops though all the movable text, and returns the one thats being clicked
 
-    var context = canvas.getContext('2d');
+    let context = canvas.getContext('2d');
     context.font = '15pt Arial';
 
-    for(var i=0; i<words.length; i++){
+    for(let i=0; i<words.length; i++){
 
         let wordWidth = context.measureText(words[i].word).width;
         if(Math.abs(words[i].x + wordWidth/2 - aCanvasX) < wordWidth/2 &&
@@ -34,9 +37,9 @@ function getWordAtLocation(aCanvasX, aCanvasY){
     return null;
 }
 
-var drawCanvas = function(){
+let drawCanvas = function(){
 
-    var context = canvas.getContext('2d');
+    let context = canvas.getContext('2d');
 
     context.fillStyle = 'white';
     context.fillRect(0,0,canvas.width,canvas.height); //erase canvas
@@ -45,9 +48,9 @@ var drawCanvas = function(){
     context.fillStyle = 'cornflowerblue';
     context.strokeStyle = 'blue';
 
-    for(var i=0; i<words.length; i++){  //note i declared as var
+    for(let i=0; i<words.length; i++){  //note i declared as let
 
-        var data = words[i];
+        let data = words[i];
         context.fillText(data.word, data.x, data.y);
         context.strokeText(data.word, data.x, data.y);
 
@@ -58,11 +61,11 @@ var drawCanvas = function(){
 function handleMouseDown(e){
 
     //get mouse location relative to canvas top left
-    var rect = canvas.getBoundingClientRect();
-    //var canvasX = e.clientX - rect.left;
-    //var canvasY = e.clientY - rect.top;
-    var canvasX = e.pageX - rect.left; //use jQuery event object pageX and pageY
-    var canvasY = e.pageY - rect.top;
+    let rect = canvas.getBoundingClientRect();
+    //let canvasX = e.clientX - rect.left;
+    //let canvasY = e.clientY - rect.top;
+    let canvasX = e.pageX - rect.left; //use jQuery event object pageX and pageY
+    let canvasY = e.pageY - rect.top;
     console.log("mouse down:" + canvasX + ", " + canvasY);
 
     wordBeingMoved = getWordAtLocation(canvasX, canvasY);
@@ -91,9 +94,9 @@ function handleMouseMove(e){
     console.log("mouse move");
 
     //get mouse location relative to canvas top left
-    var rect = canvas.getBoundingClientRect();
-    var canvasX = e.pageX - rect.left;
-    var canvasY = e.pageY - rect.top;
+    let rect = canvas.getBoundingClientRect();
+    let canvasX = e.pageX - rect.left;
+    let canvasY = e.pageY - rect.top;
 
     wordBeingMoved.x = canvasX + deltaX;
     wordBeingMoved.y = canvasY + deltaY;
@@ -118,7 +121,7 @@ function handleMouseUp(e){
 
 
 //KEY CODES
-var ENTER = 13;
+let ENTER = 13;
 
 function handleKeyUp(e){
     console.log("key UP: " + e.which);
@@ -134,7 +137,7 @@ function handleKeyUp(e){
 
 function handleSubmitButton () {
 
-    var userText = $('#userTextField').val(); //get text from user text input field
+    let userText = $('#userTextField').val(); //get text from user text input field
 
     if(userText && userText != ''){
         //user text was not empty
@@ -144,8 +147,8 @@ function handleSubmitButton () {
         textDiv.innerHTML =  `<p> </p>`
         words = [];
 
-        var userRequestObj = {text: userText}; //make object to send to server
-        var userRequestJSON = JSON.stringify(userRequestObj); //make json string
+        let userRequestObj = {text: userText}; //make object to send to server
+        let userRequestJSON = JSON.stringify(userRequestObj); //make json string
         $('#userTextField').val(''); //clear the user text field
 
         $.post("userText", userRequestJSON, function(data, status){            
@@ -153,8 +156,8 @@ function handleSubmitButton () {
             console.log("data: " + data);
             console.log("typeof: " + typeof data);
             
-            var context = canvas.getContext('2d');
-            var responseObj = JSON.parse(data);
+            let context = canvas.getContext('2d');
+            let responseObj = JSON.parse(data);
             
             textDiv.innerHTML = textDiv.innerHTML + `<p> ${userText}</p>`;
             let yValue = 30;

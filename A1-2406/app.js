@@ -1,22 +1,23 @@
-// Made by Nicholas Ellul - 101064168
-// Made for COMP 2406 Assignment 1
+/*
+Made by Nicholas Ellul - 101064168 and Peter Khlopenkov - 101072312
+Made for COMP 2406 Assignment 1
 
-// This server code was based off of tutorial 2. It handles a request for song lyrics that are stored in a 
-// text file. It then returns an array where each element of the array is a line from the requested song.
-// My thought process was to let the client do most of the work for this because the work required by the browser 
-// is something quick to do.
+This server code was based off of tutorial 2. It handles a request for song lyrics that are stored in a 
+text file. It then returns an array where each element of the array is a line from the requested song.
+My thought process was to let the client do most of the work for this because the work required by the browser 
+is something quick to do.
+*/
 
-//Server Code
-var http = require("http"); //need to http
-var fs = require("fs"); //need to read static files
-var url = require("url"); //to parse url strings
+let http = require("http"); //need to http
+let fs = require("fs"); //need to read static files
+let url = require("url"); //to parse url strings
 
-var counter = 1000; //to count invocations of function(req,res)
+let counter = 1000; //to count invocations of function(req,res)
 
-var ROOT_DIR = "html"; //dir to serve static files from
-var ROOT_SONG_DIR = "songs";
+let ROOT_DIR = "html"; //dir to serve static files from
+let ROOT_SONG_DIR = "songs";
 
-var MIME_TYPES = {
+let MIME_TYPES = {
   css: "text/css",
   gif: "image/gif",
   htm: "text/html",
@@ -30,8 +31,8 @@ var MIME_TYPES = {
   txt: "text/plain"
 };
 
-var get_mime = function(filename) {
-  var ext, type;
+let get_mime = function(filename) {
+  let ext, type;
   for (ext in MIME_TYPES) {
     type = MIME_TYPES[ext];
     if (filename.indexOf(ext, filename.length - ext.length) !== -1) {
@@ -43,13 +44,13 @@ var get_mime = function(filename) {
 
 http
   .createServer(function(request, response) {
-    var urlObj = url.parse(request.url, true, false);
+    let urlObj = url.parse(request.url, true, false);
     console.log("\n============================");
     console.log("PATHNAME: " + urlObj.pathname);
     console.log("REQUEST: " + ROOT_DIR + urlObj.pathname);
     console.log("METHOD: " + request.method);
 
-    var receivedData = "";
+    let receivedData = "";
 
     //attached event handlers to collect the message data
     request.on("data", function(chunk) {
@@ -63,11 +64,11 @@ http
 
       //if it is a POST request then echo back the data.
       if (request.method == "POST") {
-        var dataObj = JSON.parse(receivedData);
+        let dataObj = JSON.parse(receivedData);
           
         console.log("USER REQUEST: " + dataObj.text);
           
-        var returnObj = {};
+        let returnObj = {};
         let selectedSong = "";
         
         // figure out what song the server should load
@@ -108,7 +109,7 @@ http
 
       if (request.method == "GET") {
         //handle GET requests as static file requests
-        var filePath = ROOT_DIR + urlObj.pathname;
+        let filePath = ROOT_DIR + urlObj.pathname;
         if (urlObj.pathname === "/") filePath = ROOT_DIR + "/assignment1.html";
 
         fs.readFile(filePath, function(err, data) {
