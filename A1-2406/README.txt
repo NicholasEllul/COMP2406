@@ -13,3 +13,4 @@ Launch:
 Testing: 
     Visit http://localhost:3000/assignment1.html or simply http://localhost:3000/ to test the application
 
+Code from the tutorials was used to get the server and event listners working.
