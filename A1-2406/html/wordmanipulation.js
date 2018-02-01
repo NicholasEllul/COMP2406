@@ -1,4 +1,4 @@
-/*
+	/*
 Made by Nicholas Ellul - 101064168 and Peter Khlopenkov - 101072312
 Made for COMP 2406 Assignment 1
 
@@ -28,9 +28,8 @@ function getWordAtLocation(aCanvasX, aCanvasY){
 
         let wordWidth = context.measureText(words[i].word).width;
         if(Math.abs(words[i].x + wordWidth/2 - aCanvasX) < wordWidth/2 &&
-           Math.abs(words[i].y - 20/2 - aCanvasY) < 20)
+           Math.abs(words[i].y - 15/2 - aCanvasY) < 15/2)
         {
-            console.log("HITTTT");
             return words[i];
         }
     }
@@ -45,17 +44,14 @@ let drawCanvas = function(){
     context.fillRect(0,0,canvas.width,canvas.height); //erase canvas
 
     context.font = '15pt Arial';
-    context.fillStyle = 'cornflowerblue';
-    context.strokeStyle = 'blue';
+    context.fillStyle = 'black';
 
     for(let i=0; i<words.length; i++){  //note i declared as let
 
         let data = words[i];
         context.fillText(data.word, data.x, data.y);
-        context.strokeText(data.word, data.x, data.y);
 
     }
-    context.stroke();
 }
 
 function handleMouseDown(e){
@@ -159,7 +155,6 @@ function handleSubmitButton () {
             let context = canvas.getContext('2d');
             let responseObj = JSON.parse(data);
             
-            textDiv.innerHTML = textDiv.innerHTML + `<p> ${userText}</p>`;
             let yValue = 30;
             for(line of responseObj.lyricsArray){
                 let xValue = 20;
