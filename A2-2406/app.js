@@ -110,7 +110,7 @@ http
       if (request.method == "GET") {
         //handle GET requests as static file requests
         let filePath = ROOT_DIR + urlObj.pathname;
-        if (urlObj.pathname === "/") filePath = ROOT_DIR + "/assignment1.html";
+        if (urlObj.pathname === "/") filePath = ROOT_DIR + "/assignment2.html";
 
         fs.readFile(filePath, function(err, data) {
           if (err) {
