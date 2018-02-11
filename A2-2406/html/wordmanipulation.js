@@ -25,7 +25,6 @@ function getWordAtLocation(aCanvasX, aCanvasY){
     context.font = '15pt Arial';
 
     for(let i=0; i<words.length; i++){
-
         let wordWidth = context.measureText(words[i].word).width;
         if(Math.abs(words[i].x + wordWidth/2 - aCanvasX) < wordWidth/2 &&
            Math.abs(words[i].y - 15/2 - aCanvasY) < 15/2)
@@ -151,12 +150,12 @@ function handleSubmitButton () {
 
             console.log("data: " + data);
             console.log("typeof: " + typeof data);
-            
+
             let context = canvas.getContext('2d');
             let responseObj = JSON.parse(data);
             
             let yValue = 30;
-            for(line of responseObj.lyricsArray){
+            for(let line of responseObj.lyricsArray){
                 let xValue = 20;
 
                 //Write the line of lyrics beneath the search box
@@ -210,9 +209,65 @@ function handleSubmitButton () {
 
 }
 
+function handleRefreshButton() {
+    //refreshes paragraph text to match canvas
+
+    //this will store all the new lines to print
+    let newLines = [];
+
+    //copy words into tempWords to use for this function in order to not mess with other uses of words
+    let tempWords = words.slice(0);
+
+    //if a word is within this offset it will be counted as part of the line
+    const offset = 10;
+
+    //the map function will return an array of the words' y values
+    //the Math.max function will get the max from that array
+    //this will track the y value to compare all words to determine if part of
+    let currentLineY = Math.max(...tempWords.map(function(word){return word.y;})); //starts at highest word (in terms of y value)
+
+    while(currentLineY > 0) {
+        let newLine = "";
+        let wordsInLine = [];
+
+        for (let i = 0; i < tempWords.length; i++) {
+            if (tempWords[i].y >= currentLineY - offset) { //if word within offset add to line
+                wordsInLine.push(tempWords[i]);
+            }
+        }
+
+        //sort wordsInLine by their x value
+        wordsInLine.sort(function (a, b) {
+            return a.x - b.x;
+        });
+
+        //arrange all the wordsInLine into string
+        for (let i = 0; i < wordsInLine.length; i++) {
+            newLine += wordsInLine[i].word;
+            newLine += " ";
+            tempWords.splice(tempWords.indexOf(wordsInLine[i]),1); //remove from tempWords since it is being printed
+        }
+
+        newLines.unshift(newLine); //add new line to start of all lines
+
+        //update current line y to y value of highest word that hasnt been printed
+        currentLineY = Math.max(...tempWords.map(function (word) {return word.y;}));
+    }
+
+    // Reset on screen text
+    let textDiv = document.getElementById("text-area");
+    textDiv.innerHTML =  `<p> </p>`
+
+    //write new lines to textDiv
+    for(let line of newLines) {
+        textDiv.innerHTML = textDiv.innerHTML + `<p> ${line}</p>`
+    }
+
+    return null;
+}
 
 $(document).ready(function(){
-    //This is called after the broswer has loaded the web page
+    //This is called after the browser has loaded the web page
 
     //add mouse down listener to our canvas object
     $("#canvas1").mousedown(handleMouseDown);
