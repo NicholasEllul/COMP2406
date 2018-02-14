@@ -266,6 +266,18 @@ function handleRefreshButton() {
     return null;
 }
 
+function handleSaveAsButton() {
+
+    let save = true; //boolean to distinguish this as a save request
+    let songText = document.getElementById("text-area").innerText; //get song text from div
+    let userText = $('#userTextField').val(); //get text from user text input field
+
+    let userRequestObj = {newSong: songText, text: userText, save: save};
+    let userRequestJSON = JSON.stringify(userRequestObj); //make json string
+
+    $.post("newSong", userRequestJSON); //send a save request to server
+}
+
 $(document).ready(function(){
     //This is called after the browser has loaded the web page
 
