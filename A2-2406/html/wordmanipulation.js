@@ -173,7 +173,7 @@ function handleSubmitButton () {
                     let widthChordsNeed = 0;
 
                     // Strip the words of their embedded chords and add them to the array to be drawn
-                    while (aWord.indexOf('[') > -1 && (aWord.length - 1 > (aWord.indexOf(']') - aWord.indexOf('[')))  ){
+                    while (aWord.indexOf('[') > -1){
                         chordsInThisWord += 1;
 
                         let chord = '';
@@ -195,9 +195,9 @@ function handleSubmitButton () {
 
                         words.push({word:chord, x:xValue+xOffset, y:yValue-25});
                     }
-
-                    words.push({word: aWord, x:xValue, y:yValue});
-
+					if(aWord != ""){
+					  words.push({word: aWord, x:xValue, y:yValue});	
+					}
                     // Calculate spacing after word
                     xValue += 10 + context.measureText(aWord).width;
                     if(chordsInThisWord > 1) xValue += widthChordsNeed/2 + 10;
