@@ -1,10 +1,11 @@
 	/*
 Made by Nicholas Ellul - 101064168 and Peter Khlopenkov - 101072312
-Made for COMP 2406 Assignment 1
+Made for COMP 2406 Assignment 2
 
 This JS file was based on tutorial 2.
 It requests an array of song lyrics where each element is a line of the song.
 This file strips the words and writes them to the screen.
+Also allows saving reconfigurations of chords/words
 
 Use javascript array of objects to represent words and their locations
 */
@@ -212,6 +213,9 @@ function handleSubmitButton () {
 function handleRefreshButton() {
     //refreshes paragraph text to match canvas
 
+    let context = canvas.getContext('2d');
+
+
     //this will store all the new lines to print
     let newLines = [];
 
@@ -219,7 +223,8 @@ function handleRefreshButton() {
     let tempWords = words.slice(0);
 
     //if a word is within this offset it will be counted as part of the line
-    const offset = 10;
+    const offset = 15;
+    const chordOffset = 40; //chords have extra offset since they are pulled from higher than line
 
     //the map function will return an array of the words' y values
     //the Math.max function will get the max from that array
@@ -231,8 +236,14 @@ function handleRefreshButton() {
         let wordsInLine = [];
 
         for (let i = 0; i < tempWords.length; i++) {
-            if (tempWords[i].y >= currentLineY - offset) { //if word within offset add to line
-                wordsInLine.push(tempWords[i]);
+            if (tempWords[i].word.startsWith("[")) { //if this is a chord use chord offset
+                if (tempWords[i].y >= currentLineY - chordOffset) { //if word within offset add to line
+                    wordsInLine.push(tempWords[i]);
+                }
+            } else {
+                if (tempWords[i].y >= currentLineY - offset) { //if word within offset add to line
+                   wordsInLine.push(tempWords[i]);
+                }
             }
         }
 
