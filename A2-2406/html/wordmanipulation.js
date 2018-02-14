@@ -173,7 +173,7 @@ function handleSubmitButton () {
                     let widthChordsNeed = 0;
 
                     // Strip the words of their embedded chords and add them to the array to be drawn
-                    while (aWord.indexOf('[') > -1 && (aWord.length - 1 > (aWord.indexOf(']') - aWord.indexOf('[')))  ){
+                    while (aWord.indexOf('[') > -1){
                         chordsInThisWord += 1;
 
                         let chord = '';
@@ -195,9 +195,9 @@ function handleSubmitButton () {
 
                         words.push({word:chord, x:xValue+xOffset, y:yValue-25});
                     }
-
-                    words.push({word: aWord, x:xValue, y:yValue});
-
+					if(aWord != ""){
+					  words.push({word: aWord, x:xValue, y:yValue});	
+					}
                     // Calculate spacing after word
                     xValue += 10 + context.measureText(aWord).width;
                     if(chordsInThisWord > 1) xValue += widthChordsNeed/2 + 10;
@@ -264,6 +264,18 @@ function handleRefreshButton() {
     }
 
     return null;
+}
+
+function handleSaveAsButton() {
+
+    let save = true; //boolean to distinguish this as a save request
+    let songText = document.getElementById("text-area").innerText; //get song text from div
+    let userText = $('#userTextField').val(); //get text from user text input field
+
+    let userRequestObj = {newSong: songText, text: userText, save: save};
+    let userRequestJSON = JSON.stringify(userRequestObj); //make json string
+
+    $.post("newSong", userRequestJSON); //send a save request to server
 }
 
 $(document).ready(function(){
