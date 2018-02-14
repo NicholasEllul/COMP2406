@@ -212,6 +212,9 @@ function handleSubmitButton () {
 function handleRefreshButton() {
     //refreshes paragraph text to match canvas
 
+    let context = canvas.getContext('2d');
+
+
     //this will store all the new lines to print
     let newLines = [];
 
@@ -219,8 +222,8 @@ function handleRefreshButton() {
     let tempWords = words.slice(0);
 
     //if a word is within this offset it will be counted as part of the line
-    const offset = 10;
-    const chordOffset = 25; //chords have extra offset since they are pulled from higher than line
+    const offset = 15;
+    const chordOffset = 40; //chords have extra offset since they are pulled from higher than line
 
     //the map function will return an array of the words' y values
     //the Math.max function will get the max from that array
