@@ -220,6 +220,7 @@ function handleRefreshButton() {
 
     //if a word is within this offset it will be counted as part of the line
     const offset = 10;
+    const chordOffset = 25; //chords have extra offset since they are pulled from higher than line
 
     //the map function will return an array of the words' y values
     //the Math.max function will get the max from that array
@@ -231,8 +232,14 @@ function handleRefreshButton() {
         let wordsInLine = [];
 
         for (let i = 0; i < tempWords.length; i++) {
-            if (tempWords[i].y >= currentLineY - offset) { //if word within offset add to line
-                wordsInLine.push(tempWords[i]);
+            if (tempWords[i].word.startsWith("[")) { //if this is a chord use chord offset
+                if (tempWords[i].y >= currentLineY - chordOffset) { //if word within offset add to line
+                    wordsInLine.push(tempWords[i]);
+                }
+            } else {
+                if (tempWords[i].y >= currentLineY - offset) { //if word within offset add to line
+                   wordsInLine.push(tempWords[i]);
+                }
             }
         }
 
