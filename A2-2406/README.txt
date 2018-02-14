@@ -3,7 +3,7 @@ Nicholas Ellul - Student Number: 101064168
 Peter Khlopenkov - Student Number: 101072312
 
 Systems tested on:
-
+    Tested on node v8.9.1 with macOS High Sierra 10.13.3
 Launch: 
     Run `node app.js` to run the server
 

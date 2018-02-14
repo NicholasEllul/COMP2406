@@ -1,10 +1,11 @@
 	/*
 Made by Nicholas Ellul - 101064168 and Peter Khlopenkov - 101072312
-Made for COMP 2406 Assignment 1
+Made for COMP 2406 Assignment 2
 
 This JS file was based on tutorial 2.
 It requests an array of song lyrics where each element is a line of the song.
 This file strips the words and writes them to the screen.
+Also allows saving reconfigurations of chords/words
 
 Use javascript array of objects to represent words and their locations
 */
