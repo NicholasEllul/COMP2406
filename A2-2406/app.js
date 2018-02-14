@@ -9,7 +9,7 @@ is something quick to do.
 */
 
 let http = require("http"); //need to http
-let fs = require("fs"); //need to read static files
+let fs = require("fs"); //need to read static files and write songs to file
 let url = require("url"); //to parse url strings
 
 let counter = 1000; //to count invocations of function(req,res)
@@ -54,7 +54,7 @@ http
 
     //attached event handlers to collect the message data
     request.on("data", function(chunk) {
-      receivedData += chunk;
+        receivedData += chunk;
     });
 
     //event handler for the end of the message
@@ -64,47 +64,56 @@ http
 
       //if it is a POST request then echo back the data.
       if (request.method == "POST") {
-        let dataObj = JSON.parse(receivedData);
-          
-        console.log("USER REQUEST: " + dataObj.text);
-          
-        let returnObj = {};
-        let selectedSong = "";
-        
-        // figure out what song the server should load
-        if (dataObj.text.toLowerCase() === "peaceful easy feeling" ) {
-          selectedSong = "Peaceful Easy Feeling";
-        }
-        else if (dataObj.text.toLowerCase() === "sister golden hair") {
-          //returnObj.wordArray = sisterGoldenHair;
-            selectedSong = "Sister Golden Hair";
-        }
-        else if (dataObj.text.toLowerCase() === "brown eyed girl") {
-          //returnObj.wordArray = brownEyedGirl;
-            selectedSong = "Brown Eyed Girl";
-        }
-        
-        // Generate the file path
-        let filePath = ROOT_SONG_DIR + "/" + selectedSong + ".txt";
-          
-        // Read the file in
-        fs.readFile(filePath, function(err,data){
-            if (err) {
-                //report error to console
-                console.log("ERROR: Song not found." );
-                //respond with not found 404 to client
-                response.writeHead(404);
-                response.end(JSON.stringify(err));
-                return;
-            }
-        
-            // Create the array of lyric lines from the data
-            returnObj.lyricsArray = String(data).split("\n");
+          let dataObj = JSON.parse(receivedData);
 
-            //object to return to client
-            response.writeHead(200, { "Content-Type": MIME_TYPES["txt"] });
-            response.end(JSON.stringify(returnObj)); //send just the JSON object
-        });
+        console.log("USER REQUEST: " + dataObj.text);
+
+        if(dataObj.save === true){ //if this is a save request
+            let filePath = ROOT_SONG_DIR + "/" + dataObj.text + ".txt";
+            fs.writeFile(filePath,dataObj.newSong, function(err){
+               if(err) throw err;
+               console.log("Song saved to "+filePath);
+            });
+        } else {
+            //find all saved files
+            fs.readdir(ROOT_SONG_DIR, function (err, files) {
+                if(err) throw err;
+                let returnObj = {};
+                let selectedSong = "";
+                for(file of files){
+                    file = file.slice(0,-4); //remove .txt from string
+                    console.log(file);
+                    if(file.toLowerCase() === dataObj.text.toLowerCase()){
+                        selectedSong = file;
+                        break;
+                    }
+                }
+
+                // Generate the file path
+                let filePath = ROOT_SONG_DIR + "/" + selectedSong + ".txt";
+
+                // Read the file in
+                fs.readFile(filePath, function (err, data) {
+                    if (err) {
+                        //report error to console
+                        console.log("ERROR: Song not found.");
+                        //respond with not found 404 to client
+                        response.writeHead(404);
+                        response.end(JSON.stringify(err));
+                        return;
+                    }
+
+                    // Create the array of lyric lines from the data
+                    returnObj.lyricsArray = String(data).split("\n");
+
+                    //object to return to client
+                    response.writeHead(200, {"Content-Type": MIME_TYPES["txt"]});
+                    response.end(JSON.stringify(returnObj)); //send just the JSON object
+                });
+            });
+        }
+
+
       }
 
       if (request.method == "GET") {
