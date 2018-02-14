@@ -70,48 +70,46 @@ http
 
         if(dataObj.save === true){ //if this is a save request
             let filePath = ROOT_SONG_DIR + "/" + dataObj.text + ".txt";
-            fs.writeFile(filePath,dataObj.newSong, function(error){
-               if(error) throw error;
+            fs.writeFile(filePath,dataObj.newSong, function(err){
+               if(err) throw err;
                console.log("Song saved to "+filePath);
             });
         } else {
-
-            let returnObj = {};
-            let selectedSong = "";
-
-            // figure out what song the server should load
-            if (dataObj.text.toLowerCase() === "peaceful easy feeling") {
-                selectedSong = "Peaceful Easy Feeling";
-            }
-            else if (dataObj.text.toLowerCase() === "sister golden hair") {
-                //returnObj.wordArray = sisterGoldenHair;
-                selectedSong = "Sister Golden Hair";
-            }
-            else if (dataObj.text.toLowerCase() === "brown eyed girl") {
-                //returnObj.wordArray = brownEyedGirl;
-                selectedSong = "Brown Eyed Girl";
-            }
-
-            // Generate the file path
-            let filePath = ROOT_SONG_DIR + "/" + selectedSong + ".txt";
-
-            // Read the file in
-            fs.readFile(filePath, function (err, data) {
-                if (err) {
-                    //report error to console
-                    console.log("ERROR: Song not found.");
-                    //respond with not found 404 to client
-                    response.writeHead(404);
-                    response.end(JSON.stringify(err));
-                    return;
+            //find all saved files
+            fs.readdir(ROOT_SONG_DIR, function (err, files) {
+                if(err) throw err;
+                let returnObj = {};
+                let selectedSong = "";
+                for(file of files){
+                    file = file.slice(0,-4); //remove .txt from string
+                    console.log(file);
+                    if(file.toLowerCase() === dataObj.text.toLowerCase()){
+                        selectedSong = file;
+                        break;
+                    }
                 }
 
-                // Create the array of lyric lines from the data
-                returnObj.lyricsArray = String(data).split("\n");
+                // Generate the file path
+                let filePath = ROOT_SONG_DIR + "/" + selectedSong + ".txt";
 
-                //object to return to client
-                response.writeHead(200, {"Content-Type": MIME_TYPES["txt"]});
-                response.end(JSON.stringify(returnObj)); //send just the JSON object
+                // Read the file in
+                fs.readFile(filePath, function (err, data) {
+                    if (err) {
+                        //report error to console
+                        console.log("ERROR: Song not found.");
+                        //respond with not found 404 to client
+                        response.writeHead(404);
+                        response.end(JSON.stringify(err));
+                        return;
+                    }
+
+                    // Create the array of lyric lines from the data
+                    returnObj.lyricsArray = String(data).split("\n");
+
+                    //object to return to client
+                    response.writeHead(200, {"Content-Type": MIME_TYPES["txt"]});
+                    response.end(JSON.stringify(returnObj)); //send just the JSON object
+                });
             });
         }
 
