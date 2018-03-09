@@ -1,28 +1,36 @@
 
 
 body {
-	background: #dddddd;
+	background: #000;
+	 font-family: "Roboto", "Helvetica Neue", Helvetica, Arial, sans-serif;
 }	
 
 /*element selectors: */
 canvas {
 	margin: 20px;
-	/*important here for padding to be 0 for mouse calculations */
- 
-	
-	padding: 0px; 
-	
+	outline:2px solid #ffffff;
 }
 
-/* class selectors: */
-.canvas {            
-	background: #ffffff;
-	border: thin inset #aaaaaa;
-	display:block;
+.flexbox-container {
+	display: flex;
 	margin: 0 auto;
 }
 
-/*id selectors: */	 
-#canvas1 {
+.flex-content{
+	text-align: center;
+	flex-basis: 50;
+	flex: auto
 }
 
+
+.game{
+	position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translateX(-50%) translateY(-50%);
+}
+
+p{
+	font-size: 24px;
+	color: white;
+}

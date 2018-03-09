@@ -1,17 +1,35 @@
 <html>
-    <head>
-        <title>Canvas Size</title>
-        <link rel="stylesheet" href="style.css">
-    </head>
+	<head>
+		<title>Canvas Size</title>
+		<link rel="stylesheet" href="style.css">
+	</head>
 
-    <body>
-        <canvas id='canvas1' class='canvas' width='1200' height='600'>
-            Canvas not supported
-        </canvas> 
-        <div></div>
+	<body>
+		<div class="game">
+			<canvas id='canvas1' class='canvas' width='740' height='415'>
+				Canvas not supported
+			</canvas> 
 
+			<div class="flexbox-container">
+				<div class="flex-content">
+					<button id="btnLeft">Join</button>
+				</div>
+				<div class="flex-content">
+					<button id="btnRight">Join</button>
+				</div>
+			</div>
+
+			<div class="flexbox-container">
+				<div class="flex-content">
+					<p id="leftScore">0</p>
+				</div>
+				<div class="flex-content">
+					<p id="rightScore">0</p>
+				</div>
+			</div>
+		</div>
 		<script src="/socket.io/socket.io.js"></script>
 		<script src="jquery-1.11.3.js"></script>
-        <script src='airHockeyController.js'></script>
-    </body>
+		<script src='airHockeyController.js'></script>
+	</body>
 </html>
