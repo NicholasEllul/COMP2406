@@ -1,3 +1,6 @@
+// This is the server side code. It is written in a cost efficient way 
+// so that the client does most of the work
+// Written by Nicholas Ellul - 101064168
 
 const app = require('http').createServer(handler)
 const io = require('socket.io')(app) //wrap server app in socket io capability
@@ -45,6 +48,7 @@ let rightPaddleStatus = {claimed:false};
 let leftScore = 0,
 	rightScore = 0;
 
+// Resets the score on the server, and tells the client to do the same
 function resetScore(){
 	leftScore = 0;
 	rightScore = 0;
@@ -55,49 +59,50 @@ function resetScore(){
 
 io.on('connection', function(socket){
 
+	// Add the socket to a list of players
 	playersConnected.push(socket.id);
-	console.log("there are " + playersConnected.length);
-	console.log("This boi " + socket.id + " connected");
-
-
+	
+	// Init updates the new player with the status of the game
 	socket.on('init', (data) =>{
-
+		socket.broadcast.emit('newPlayerJoined'); // Tell players new player joined to get data
+		
+		// If left paddle is claimed, reflect this in the new clients browser
 		if(leftPaddleStatus.claimed == true){
-
 			io.sockets.connected[socket.id].emit('leftPlayerClaimed',
 												 JSON.stringify({claimed:true})); 
 		}
+		// If right paddle is claimed, reflect this in the new clients browser
 		if(rightPaddleStatus.claimed == true){
-
 			io.sockets.connected[socket.id].emit('rightPlayerClaimed',// change to just broadcast to one dude
 												 JSON.stringify({claimed:true})); 
 		}
+		// Ask the first player (oldest player) for the ball's position
 		if(playersConnected.length > 1) {
-			socket.broadcast.to(playersConnected[0]).emit('sendMeWherePuckIs'); 
+			socket.broadcast.to(playersConnected[0]).emit('sendMeWhereBallIs'); 
 		}
 	});
 
-	socket.on('puckLocation', (data) =>{
-
-
-		io.emit('updatePuck',data);
+	// When given the ball's location from one client, send it to everyone to sync up
+	// Data is going to be a ball object
+	socket.on('ballLocation', (data) =>{
+		io.emit('updateBall',data);
 	});
-	// Data is true or false
+
+	// If a client says theyve claimed/released a paddle, broadcast this to all the clients
+	// Data is going to be true or false in an object
 	socket.on('claimPlayerRight', (data) =>{
-		console.log("Owner : " + socket.id);
 		rightPaddleStatus.owner = socket.id;
-		rightPaddleStatus.claimed = data;
+		rightPaddleStatus.claimed = JSON.parse(data).claimed;
 		io.emit('rightPlayerClaimed',data);
 	});
 	socket.on('claimPlayerLeft', (data) =>{
-		console.log("Owner : " + socket.id);
 		leftPaddleStatus.owner = socket.id;
-		leftPaddleStatus.claimed = data;
+		leftPaddleStatus.claimed = JSON.parse(data).claimed;
 		io.emit('leftPlayerClaimed', data);
 	});
-	socket.on('clientSays', (data) =>{
-		socket.broadcast.emit('serverSays', data);
-	});
+	
+	// If a player sends an update of their position, broadcast this position to everyone
+	// Data in this case is the Y position of the paddle in an object
 	socket.on('leftPlayerUpdate', (data) =>{
 		socket.broadcast.emit('leftPlayerUpdate',data);
 	});
@@ -105,6 +110,8 @@ io.on('connection', function(socket){
 
 		socket.broadcast.emit('rightPlayerUpdate',data);
 	});
+	
+	// If the server is notified of a goal, broacast this to all the clients
 	socket.on('leftGoal',(data) =>{
 		leftScore++;
 		io.emit('leftGoal',JSON.stringify({score:leftScore}));
@@ -115,20 +122,20 @@ io.on('connection', function(socket){
 		io.emit('rightGoal', JSON.stringify({score:rightScore}));
 
 	});
+	
 	socket.on('disconnect', (reason) =>{
-		console.log("This boi " + socket.id + " disconnected");
 
-
+		// If a player owning a paddle discconects, remove his ownership for him
 		if(leftPaddleStatus.owner == socket.id){
 
 			leftPaddleStatus.claimed = false;
 			resetScore();
-			io.emit('leftPlayerClaimed', false);
+			io.emit('leftPlayerClaimed', JSON.stringify({claimed:false}));
 		}
 		if(rightPaddleStatus.owner == socket.id){
 			rightPaddleStatus.claimed = false;
 			resetScore();
-			io.emit('rightPlayerClaimed', false);
+			io.emit('rightPlayerClaimed', JSON.stringify({claimed:false}));
 		}
 
 		// Remove this player from our list of players while maintaining queue order
@@ -144,7 +151,7 @@ io.on('connection', function(socket){
 });
 
 
-
+// Handles HTTP server requests
 function handler(request, response) {
 	let urlObj = url.parse(request.url, true, false)
 	let receivedData = "";
@@ -177,4 +184,4 @@ function handler(request, response) {
 
 
 console.log("Server Running at PORT: 3000  CNTL-C to quit");
-console.log("To Test: open several browsers at: http://localhost:3000/canvasWithTimer.html")
+console.log("To Test: open several browsers at: http://localhost:3000/assignment3.html")
