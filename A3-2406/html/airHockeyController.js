@@ -1,220 +1,363 @@
-
-var puck = {
-	word: "Moving",
-	x: 100,
-	y: 100,
-	xDirection: 1, //+1 for leftwards, -1 for rightwards
-	yDirection: 1, //+1 for downwards, -1 for upwards
-	stringWidth: 50, //will be updated when drawn
-	stringHeight: 24
-}; //assumed height based on drawing point size
+'use strict';
 
 var timer; //used to control the free moving word
-//intended for keyboard control
-var movingBox = {
-	x: 50,
-	y: 50,
-	width: 100,
-	height: 100
-};
 
-var deltaX, deltaY; //location where mouse is pressed
 var canvas = document.getElementById("canvas1"); //our drawing canvas
-var fontPointSize = 18; //point size for word text
-var wordHeight = 20; //estimated height of a string in the editor
-var editorFont = "Arial"; //font for your editor
+//var fontPointSize = 18; //point size for word text
+//var editorFont = "Arial"; //font for your editor
 
-var drawCanvas = function() {
-	var context = canvas.getContext("2d");
+let leftScore = 0,
+	rightScore = 0;
+let leftPlayer = new Player(5, 100, 10, 100);
+let rightPlayer = new Player(canvas.width - 15, 100, 10, 100);
 
-	context.fillStyle = "white";
-	context.fillRect(0, 0, canvas.width, canvas.height); //erase canvas
+let isLeftPlayer = false,
+	isRightPlayer = false;
 
-	context.font = "" + fontPointSize + "pt " + editorFont;
-	context.fillStyle = "cornflowerblue";
-	context.strokeStyle = "blue";
+let leftClaimed = false,
+	rightClaimed = false;
 
-	puck.stringWidth = context.measureText(puck.word).width;
-	context.fillText(puck.word, puck.x, puck.y);
-	//draw moving box
-	context.fillRect(movingBox.x, movingBox.y, movingBox.width, movingBox.height);
+let BALL_SPEED = 4;
+let ballActive = true;
 
-	context.stroke();
-};
+let gameBall = new Ball(300, 150, 10,BALL_SPEED);
 
-$(window).mousedown((e)=>{
-	//get mouse location relative to canvas top left
-	var rect = canvas.getBoundingClientRect();
-	//var canvasX = e.clientX - rect.left;
-	//var canvasY = e.clientY - rect.top;
-	var canvasX = e.pageX - rect.left; //use jQuery event object pageX and pageY
-	var canvasY = e.pageY - rect.top;
+let name;
 
-	// Stop propagation of the event and stop any default
-	//  browser action
-	//e.stopPropagation();
-	//e.preventDefault();
 
-	drawCanvas();
-}
+
+$("#btnRight").click(function () {
+	if (!isLeftPlayer && !isRightPlayer) {
+		isRightPlayer = true;
+		//this.innerHTML = playerName;
+		//this.disabled = true;
+
+		// Prevent user from clicking both
+		$("#btnLeft").prop('disabled', true);
+		console.log(name);
+		$("#btnRight").html(name);
+		socket.emit('claimPlayerRight',true);
+		return;
+	}
+	if(isRightPlayer){
+		isRightPlayer = false;
+		if(leftClaimed == false){
+			$("#btnLeft").prop('disabled', false);
+		}
+		$("#btnRight").html("Join");
+		socket.emit('claimPlayerRight',false);
+	}
 });
 
-function handleMouseDown(e) {
-	//get mouse location relative to canvas top left
-	var rect = canvas.getBoundingClientRect();
-	//var canvasX = e.clientX - rect.left;
-	//var canvasY = e.clientY - rect.top;
-	var canvasX = e.pageX - rect.left; //use jQuery event object pageX and pageY
-	var canvasY = e.pageY - rect.top;
-	console.log("mouse down:" + canvasX + ", " + canvasY);
+$("#btnLeft").click(function () {
+	if (!isRightPlayer && !isLeftPlayer) {
+		isLeftPlayer = true;
+		//this.innerHTML = playerName;
+		//this.disabled = true;
 
-	//console.log(wordBeingMoved.word);
-	if (wordBeingMoved != null) {
-		//deltaX = wordBeingMoved.x - canvasX;
-		//deltaY = wordBeingMoved.y - canvasY;
-		//attache mouse move and mouse up handlers
-		$("#canvas1").mousemove(handleMouseMove);
-		$("#canvas1").mouseup(handleMouseUp);
+		// Prevent user from clicking both
+		$("#btnRight").prop('disabled', true);
+		$("#btnLeft").html(name);
+		socket.emit('claimPlayerLeft',true);
+		return;
+	}
+	if(isLeftPlayer){
+		isLeftPlayer = false;
+		if(rightClaimed == false){
+			$("#btnRight").prop('disabled', false);
+		}
+		$("#btnLeft").html("Join");
+		socket.emit('claimPlayerLeft',false);
+	}
+});
+
+
+function Player(x, y, width, height, id) {
+	this.x = x;
+	this.y = y;
+	this.width = width;
+	this.height = height;
+	this.id = id;
+	this.draw = function (context) {
+		context.beginPath();
+		context.lineWidth=5;
+		context.strokeStyle = "#ff1744";
+		context.strokeRect(this.x, this.y, this.width, this.height);
+		context.stroke();
+		context.closePath();
+	}
+}
+
+function Ball(x, y, radius, speed) {
+	this.x = x;
+	this.y = y;
+	this.radius = radius;
+	this.xSpeed = speed;
+	this.ySpeed = speed;
+
+	this.checkCollision = function () {
+		console.log(this.y);
+		if (this.x + this.radius + BALL_SPEED > canvas.width) this.xSpeed = -BALL_SPEED;
+		if (this.x - this.radius - BALL_SPEED < 0) this.xSpeed = BALL_SPEED;
+		if (this.y + this.radius + BALL_SPEED > canvas.height) this.ySpeed = -BALL_SPEED;
+		if (this.y - this.radius - BALL_SPEED < 0) this.ySpeed = BALL_SPEED;
 	}
 
-	// Stop propagation of the event and stop any default
-	//  browser action
-	//e.stopPropagation();
-	//e.preventDefault();
+	this.draw = function (context) {
 
-	drawCanvas();
+		if(ballActive == true){
+			this.x += this.xSpeed;
+			this.y += this.ySpeed;
+		}
+		context.beginPath();
+		context.lineWidth = 4;
+		context.strokeStyle = "#40c4ff";
+		context.arc(this.x, this.y, this.radius, 2 * Math.PI, false);
+		context.stroke();
+		context.closePath();
+	}
 }
 
-function handleMouseMove(e) {
-	console.log("mouse move");
 
-	//get mouse location relative to canvas top left
-	var rect = canvas.getBoundingClientRect();
-	var canvasX = e.pageX - rect.left;
-	var canvasY = e.pageY - rect.top;
+var drawCanvas = function () {
+	var context = canvas.getContext("2d");
 
-	//wordBeingMoved.x = canvasX + deltaX;
-	//wordBeingMoved.y = canvasY + deltaY;
+	context.fillStyle = "#000000";
+	context.fillRect(0, 0, canvas.width, canvas.height); //erase canvas
 
-	//e.stopPropagation();
+	//context.font = "" + fontPointSize + "pt " + editorFont;
 
-	drawCanvas();
-}
+	//	puck.stringWidth = context.measureText(puck.word).width;
+	//	context.fillText(puck.word, puck.x, puck.y);
+	//draw moving box
+	leftPlayer.draw(context);
+	rightPlayer.draw(context);
+	gameBall.draw(context);
 
-function handleMouseUp(e) {
-	console.log("mouse up");
-	e.stopPropagation();
-	//remove mouse move and mouse up handlers but leave mouse down handler
-	$("#canvas1").off("mousemove", handleMouseMove); //remove mouse move handler
-	$("#canvas1").off("mouseup", handleMouseUp); //remove mouse up handler
+};
 
-	drawCanvas(); //redraw the canvas
-}
 
-function movePuck(){
-	// Handle moving word
-	puck.x = puck.x + 2 * puck.xDirection;
-	puck.y = puck.y + 2 * puck.yDirection;
+function centerBall(ball) {
+	ball.x = canvas.width / 2;
+	ball.y = Math.floor(Math.random() * (canvas.height-ball.radius+1) + ball.radius);
+	updateBallLocation();
 
-	//keep moving word within bounds of canvas
-	if (puck.x + puck.stringWidth > canvas.width)
-		puck.xDirection = -1;
-	if (puck.x < 0) puck.xDirection = 1;
-	if (puck.y > canvas.height) puck.yDirection = -1;
-	if (puck.y - puck.stringHeight < 0)
-		puck.yDirection = 1;
 
 }
 
-function movePaddle(){
+let handleBallCollision = (ball, leftPaddle, rightPaddle) => {
+	// Check if colliding with paddles
+	collidingWithPlayerCheck(ball, leftPaddle, rightPaddle);
+
+	// if colliding with wall
+	if (ball.x + ball.radius + BALL_SPEED > canvas.width) ball.xSpeed = -BALL_SPEED;
+	if (ball.x - ball.radius - BALL_SPEED < 0) ball.xSpeed = BALL_SPEED;
+	if (ball.y + ball.radius + BALL_SPEED > canvas.height) ball.ySpeed = -BALL_SPEED;
+	if (ball.y - ball.radius - BALL_SPEED < 0) ball.ySpeed = BALL_SPEED;
+
+	// check if colliding with back wall ie: a goal
+	if(leftClaimed && rightClaimed){
+		if (ball.x + ball.radius + 8 > canvas.width && isLeftPlayer) {
+			if ( rightClaimed || true) {
+				socket.emit('leftGoal');
+				centerBall(ball);
+			}
+
+		} else if (ball.x - ball.radius - 8 < 0 && isRightPlayer) {
+			if (leftClaimed || true) {
+				socket.emit('rightGoal');
+				centerBall(ball);
+			}
+		}
+	}
+
+}
+
+let collidingWithPlayerCheck = (ball, leftPaddle, rightPaddle) => {
+
+	// If colliding with left player
+	if (ball.x - ball.radius < leftPaddle.x + leftPaddle.width &&
+		ball.y + ball.radius > leftPaddle.y &&
+		ball.y - ball.radius < leftPaddle.y + leftPaddle.height) {
+		ball.x += BALL_SPEED;
+		ball.xSpeed = BALL_SPEED;
+		if (isLeftPlayer) updateBallLocation();
+	}
+	// If colliding with right player
+	else if (
+		ball.x + ball.radius > rightPaddle.x &&
+		ball.y + ball.radius > rightPaddle.y &&
+		ball.y - ball.radius < rightPaddle.y + rightPaddle.height) {
+		ball.x -= BALL_SPEED;
+		ball.xSpeed = -BALL_SPEED;
+		if (isRightPlayer) updateBallLocation();
+	}
+
+}
+
+function movePaddle(player) {
 	const dXY = 5; //amount to move in both X and Y direction
 
-	if(keysPressed[LEFT_ARROW] && movingBox.x >= dXY){
+	if (keysPressed[UP_ARROW] && player.y - dXY >= 0) {
+		player.y -= dXY;
+		updateLocation(player);
 
-		movingBox.x -= dXY; //left arrow
-		updateLocation();
 	}
-	if(keysPressed[UP_ARROW] && movingBox.y >= dXY){
+	if (keysPressed[DOWN_ARROW] && player.y + player.height + dXY <= canvas.height) {
 
-		movingBox.y -= dXY;
-		updateLocation();
-	}
-	if(keysPressed[DOWN_ARROW] && movingBox.y + movingBox.height + dXY <= canvas.height){
+		player.y += dXY;
+		updateLocation(player);
 
-		movingBox.y += dXY; //down arrow
-		updateLocation();
-	}
-	if(keysPressed[RIGHT_ARROW] && movingBox.x + movingBox.width + dXY <= canvas.width){
-
-		movingBox.x += dXY; //right arrow
-		updateLocation();
 	}
 }
 
 function update() {
+	if (isLeftPlayer) {
+		movePaddle(leftPlayer);
+	}
+	if (isRightPlayer) {
+		movePaddle(rightPlayer);
+	}
 
-	movePaddle();
-	movePuck();
+	//movePaddle()
+
+	handleBallCollision(gameBall, leftPlayer, rightPlayer);
 	drawCanvas();
 }
 
+// keypress handling startx
 //KEY CODES
 //should clean up these hard coded key codes
-var RIGHT_ARROW = 39;
-var LEFT_ARROW = 37;
-var UP_ARROW = 38;
-var DOWN_ARROW = 40;
-
-// SOCKET EVENTS /////////////////////////////////////////
-var socket = io('http://' + window.document.location.host);
-
-socket.on('serverSays', function(data) {
-	movingBox = JSON.parse(data);
-});
-
-// Only the first client is responsible for sending this
-socket.on('sendMeWherePuckIs', function(data){
-	console.log("OOOOOOOO");
-	let responseData = JSON.stringify(puck);
-	socket.emit('puckLocation', responseData);
-});
-
-// Update clients puck
-socket.on('updatePuck', function(newPuckLocation){
-	puck = JSON.parse(newPuckLocation);
-	console.log(puck);
-})
-function updateLocation(){
-	let data = JSON.stringify(movingBox);
-	socket.emit('clientSays', data);
-}
-// SOCKET EVENTS /////////////////////////////////////////
+const UP_ARROW = 38;
+const DOWN_ARROW = 40;
 
 let keysPressed = {};
 
-$(window).keyup((e)=>{
-	if(e.which == UP_ARROW || e.which == RIGHT_ARROW || e.which == LEFT_ARROW || e.which == DOWN_ARROW ){
+$(window).keyup((e) => {
+	if (e.which == UP_ARROW || e.which == DOWN_ARROW) {
 		keysPressed[e.which] = false;
 	}
 });
 
-$(window).keydown((e)=>{
-	if(e.which == UP_ARROW || e.which == RIGHT_ARROW || e.which == LEFT_ARROW || e.which == DOWN_ARROW ){
+$(window).keydown((e) => {
+	if (e.which == UP_ARROW || e.which == DOWN_ARROW) {
 		keysPressed[e.which] = true;
-
 	}
 });
 
-$(document).ready(function() {
-	//add mouse down listener to our canvas object
-	$("#canvas1").mousedown(handleMouseDown);
-	//add keyboard handler to document
-	$(document).keydown(handleKeyDown);
-	$(document).keyup(handleKeyUp);
 
-	timer = setInterval(update, 60); //
-	//pollingTimer = setInterval(pollingTimerHandler, 100); //quarter of a second
-	//timer.clearInterval(); //to stop
 
-	drawCanvas();
+
+
+//closex
+//Socket I/O startx
+
+var socket = io('http://' + window.document.location.host);
+
+socket.on('serverSays', function (data) {
+
+	movingBox = JSON.parse(data);
 });
+
+// Only the first client is responsible for sending this
+socket.on('sendMeWherePuckIs', function () {
+	updateBallLocation();
+});
+
+// Update clients puck
+socket.on('updatePuck', function (newPuckLocation) {
+	let location = JSON.parse(newPuckLocation);
+
+	gameBall.x = location.x;
+	gameBall.y = location.y;
+	gameBall.xSpeed = location.xSpeed;
+	gameBall.ySpeed = location.ySpeed;
+});
+
+socket.on('leftPlayerUpdate', (data) => {
+	leftPlayer.y = JSON.parse(data).y;
+});
+socket.on('rightPlayerUpdate', (data) => {
+	rightPlayer.y = JSON.parse(data).y;
+});
+socket.on('rightPlayerClaimed', (data) => {
+	//rightClaimed = JSON.parse(data).claimed;
+	rightClaimed = data;
+	if(isLeftPlayer && data == false){
+
+	}
+	else if(!isRightPlayer) $("#btnRight").prop('disabled', data);
+});
+socket.on('leftPlayerClaimed', (data) => {
+	//leftClaimed = JSON.parse(data).claimed;
+	leftClaimed = data;
+	if(isRightPlayer && data == false){
+
+	}
+	else if(!isLeftPlayer) $("#btnLeft").prop('disabled', data);
+});
+
+socket.on('leftGoal', (score) => {
+
+	leftScore = JSON.parse(score).score;
+	console.log(leftScore)
+	ballActive = false;
+	gameBall.xSpeed = -BALL_SPEED;
+	setTimeout(function(){
+		ballActive = true;
+		console.log("done");
+	},1500);
+	$("#leftScore").html(leftScore.toString());
+});
+
+socket.on('rightGoal', (score) => {
+	rightScore = JSON.parse(score).score;
+	ballActive = false;
+	gameBall.xSpeed = BALL_SPEED;
+
+	setTimeout(function(){
+		ballActive = true;
+		console.log("done");
+	},1500);
+
+
+	$("#rightScore").html(rightScore.toString());
+});
+
+function updateLocation(player) {
+	let yPos = {
+		y: player.y
+	};
+	if (isLeftPlayer) socket.emit('leftPlayerUpdate', JSON.stringify(yPos));
+	if (isRightPlayer) socket.emit('rightPlayerUpdate', JSON.stringify(yPos));
+}
+
+function updateBallLocation() {
+	let responseData = {
+		x: gameBall.x,
+		y: gameBall.y,
+		xSpeed: gameBall.xSpeed,
+		ySpeed: gameBall.ySpeed
+	};
+
+	//JSON.stringify(puck);
+	console.log(JSON.stringify(responseData));
+	socket.emit('puckLocation', JSON.stringify(responseData));
+}
+
+$(document).ready(function () {
+
+	do{
+		name = prompt("INSTRUCTIONS\n"+
+					  "Click a button to claim control of a paddle.\n"+
+					  "Use the arrow keys to move the paddle up and down.\n"+
+					  "Click the button again to relieve control.\n"+
+					  "Game starts once both paddles are claimed.\n\n"+
+					 "PLEASE ENTER YOUR NAME TO START");
+	}while(!name);
+
+	timer = setInterval(update, 10); //
+	socket.emit('init');
+});
+
+//closex
