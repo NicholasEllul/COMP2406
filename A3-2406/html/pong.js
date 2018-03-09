@@ -39,7 +39,7 @@ $("#btnRight").click(function () {
 		isRightPlayer = true;
 		$("#btnLeft").prop('disabled', true);
 		$("#btnRight").html(name);
-		rightPlayer.enableOwnershipColour(false);
+		rightPlayer.enableOwnershipColour(true);
 		socket.emit('claimPlayerRight',true);
 		return;
 	}
@@ -94,10 +94,10 @@ function Player(x, y, width, height, id) {
 	this.enableOwnershipColour = function(activateColour){
 		
 		if(activateColour){
-			this.colour = "#ff1744";
+			this.colour = "#00e676";
 		}
 		else{
-			this.colour = "#00e676";
+			this.colour = "#ff1744";
 		}
 	}
 }
