@@ -1,8 +1,8 @@
 'use strict';
 
-var timer; //used to control the free moving word
+let timer; //used to control the free moving word
 
-var canvas = document.getElementById("canvas1"); //our drawing canvas
+let canvas = document.getElementById("canvas1"); //our drawing canvas
 //var fontPointSize = 18; //point size for word text
 //var editorFont = "Arial"; //font for your editor
 
@@ -10,6 +10,13 @@ let leftScore = 0,
 	rightScore = 0;
 let leftPlayer = new Player(5, 100, 10, 100);
 let rightPlayer = new Player(canvas.width - 15, 100, 10, 100);
+
+//KEY CODES
+const UP_ARROW = 38;
+const DOWN_ARROW = 40;
+
+let keysPressed = {};
+
 
 let isLeftPlayer = false,
 	isRightPlayer = false;
@@ -24,6 +31,7 @@ let gameBall = new Ball(300, 150, 10,BALL_SPEED);
 
 let name;
 
+let socket = io('http://' + window.document.location.host);
 
 
 $("#btnRight").click(function () {
@@ -31,7 +39,7 @@ $("#btnRight").click(function () {
 		isRightPlayer = true;
 		$("#btnLeft").prop('disabled', true);
 		$("#btnRight").html(name);
-		rightPlayer.toggleOwnerShip();
+		rightPlayer.enableOwnershipColour(false);
 		socket.emit('claimPlayerRight',true);
 		return;
 	}
@@ -41,7 +49,7 @@ $("#btnRight").click(function () {
 			$("#btnLeft").prop('disabled', false);
 		}
 		$("#btnRight").html("Join");
-		rightPlayer.toggleOwnerShip();
+		rightPlayer.enableOwnershipColour(false);
 		socket.emit('claimPlayerRight',false);
 	}
 });
@@ -51,7 +59,7 @@ $("#btnLeft").click(function () {
 		isLeftPlayer = true;
 		$("#btnRight").prop('disabled', true);
 		$("#btnLeft").html(name);
-		leftPlayer.toggleOwnership();
+		leftPlayer.enableOwnershipColour(true);
 		socket.emit('claimPlayerLeft',true);
 		return;
 	}
@@ -61,7 +69,7 @@ $("#btnLeft").click(function () {
 			$("#btnRight").prop('disabled', false);
 		}
 		$("#btnLeft").html("Join");
-		leftPlayer.toggleOwnership();
+		leftPlayer.enableOwnershipColour(false);
 		socket.emit('claimPlayerLeft',false);
 	}
 });
@@ -83,13 +91,13 @@ function Player(x, y, width, height, id) {
 		context.closePath();
 	}
 	
-	this.toggleOwnership = function(){
-		console.log("colour = " + this.colour);
-		if(this.colour == "#ff1744"){
-			this.colour = "#00e676";
+	this.enableOwnershipColour = function(activateColour){
+		
+		if(activateColour){
+			this.colour = "#ff1744";
 		}
 		else{
-			this.colour = "#ff1744";
+			this.colour = "#00e676";
 		}
 	}
 }
@@ -224,20 +232,9 @@ function update() {
 	if (isRightPlayer) {
 		movePaddle(rightPlayer);
 	}
-
-	//movePaddle()
-
 	handleBallCollision(gameBall, leftPlayer, rightPlayer);
 	drawCanvas();
 }
-
-// keypress handling startx
-//KEY CODES
-//should clean up these hard coded key codes
-const UP_ARROW = 38;
-const DOWN_ARROW = 40;
-
-let keysPressed = {};
 
 $(window).keyup((e) => {
 	if (e.which == UP_ARROW || e.which == DOWN_ARROW) {
@@ -252,13 +249,7 @@ $(window).keydown((e) => {
 });
 
 
-
-
-
-//closex
 //Socket I/O startx
-
-var socket = io('http://' + window.document.location.host);
 
 socket.on('serverSays', function (data) {
 
