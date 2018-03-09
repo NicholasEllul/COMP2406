@@ -29,13 +29,9 @@ let name;
 $("#btnRight").click(function () {
 	if (!isLeftPlayer && !isRightPlayer) {
 		isRightPlayer = true;
-		//this.innerHTML = playerName;
-		//this.disabled = true;
-
-		// Prevent user from clicking both
 		$("#btnLeft").prop('disabled', true);
-		console.log(name);
 		$("#btnRight").html(name);
+		rightPlayer.toggleOwnerShip();
 		socket.emit('claimPlayerRight',true);
 		return;
 	}
@@ -45,6 +41,7 @@ $("#btnRight").click(function () {
 			$("#btnLeft").prop('disabled', false);
 		}
 		$("#btnRight").html("Join");
+		rightPlayer.toggleOwnerShip();
 		socket.emit('claimPlayerRight',false);
 	}
 });
@@ -52,12 +49,9 @@ $("#btnRight").click(function () {
 $("#btnLeft").click(function () {
 	if (!isRightPlayer && !isLeftPlayer) {
 		isLeftPlayer = true;
-		//this.innerHTML = playerName;
-		//this.disabled = true;
-
-		// Prevent user from clicking both
 		$("#btnRight").prop('disabled', true);
 		$("#btnLeft").html(name);
+		leftPlayer.toggleOwnership();
 		socket.emit('claimPlayerLeft',true);
 		return;
 	}
@@ -67,6 +61,7 @@ $("#btnLeft").click(function () {
 			$("#btnRight").prop('disabled', false);
 		}
 		$("#btnLeft").html("Join");
+		leftPlayer.toggleOwnership();
 		socket.emit('claimPlayerLeft',false);
 	}
 });
@@ -78,13 +73,24 @@ function Player(x, y, width, height, id) {
 	this.width = width;
 	this.height = height;
 	this.id = id;
+	this.colour = "#ff1744";
 	this.draw = function (context) {
 		context.beginPath();
 		context.lineWidth=5;
-		context.strokeStyle = "#ff1744";
+		context.strokeStyle = this.colour;
 		context.strokeRect(this.x, this.y, this.width, this.height);
 		context.stroke();
 		context.closePath();
+	}
+	
+	this.toggleOwnership = function(){
+		console.log("colour = " + this.colour);
+		if(this.colour == "#ff1744"){
+			this.colour = "#00e676";
+		}
+		else{
+			this.colour = "#ff1744";
+		}
 	}
 }
 
