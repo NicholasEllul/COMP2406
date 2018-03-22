@@ -4,9 +4,9 @@
   "description": "Assignment 4 2406",
   "main": "app.js",
   "dependencies": {
-    "ejs": "^2.5.7",
-    "express": "^4.16.3",
-    "request": "^2.85.0"
+    "ejs": "~2.5.7",
+    "express": "~4.16.3",
+    "request": "~2.85.0"
   },
   "devDependencies": {},
   "scripts": {

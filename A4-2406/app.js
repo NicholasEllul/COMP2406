@@ -10,10 +10,10 @@ const API_KEY = '8dadac7216b82e93d694764054d7ef3e';
 const ROUTE_REGEX = '/|/recipes(\.html)?|/index(\.html)?'
 
 function renderRecipes(ingredient,res){
-	//You need to provide an appid with your request.
-	//Many API services now require that clients register for an app id.
+	// This function makes the API request and renders the view in the callback function
 
 	apiRequest(`http://www.food2fork.com/api/search?q=${ingredient}&key=${API_KEY}`, {json:true}, function (error, response, body){
+		// IF there were no errors render
 		if (!error && response.statusCode == 200) {
 			res.render('pages/index',body);
 		}
@@ -35,24 +35,27 @@ app.use(express.json());
 app.use(express.urlencoded());
 
 let handler = function(request,response){
-
+	
+	// Default ingredients list to nothing incase no valid data is given
 	let ingredientList = null;
 
-	if(request.method == "GET"){
+	if(request.method == "GET"){ // Get the URL queries ingredients if a get request is made
 		ingredientList = request.query.ingredients;
 	}
 
-	if(request.method == "POST"){
+	if(request.method == "POST"){ // Get the post body ingredients if a post is made
 		if(request.body.ingredients)
 			ingredientList = request.body.ingredients;
 	}
 	
+	// Call the render with those ingredients
 	renderRecipes(ingredientList,response);
 };
 
+// Handle all get/post/etc.. requests that match my regex for valid URLs
 app.all(ROUTE_REGEX, handler);
 
 app.listen(PORT, err => {
 	if(err) console.log(err)
-	else {console.log(`Server listening on port: ${PORT}`)}
+	else {console.log(`Visit localhost:${PORT}/recipes`)}
 });
