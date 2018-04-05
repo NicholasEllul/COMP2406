@@ -78,11 +78,15 @@ router.post('/checkout-process', function (req, res) {
 	console.log(create_payment_json);
 	console.log(create_payment_json.transactions[0].amount.total);
 	console.log(create_payment_json.transactions[0].item_list.items);
+	console.log("\n\n\n\n\n\n dilly dilly")
+	console.log( req.session)
 
 	paypal.payment.create(create_payment_json, function (error, payment) { //create paypal payment
 
 		if (error) {
 			console.log(error);
+			console.log("\n\n\n\n\n\n")
+				console.log(payment);
 			console.log(error.response.details);
 			throw error;
 		} else {
@@ -90,15 +94,6 @@ router.post('/checkout-process', function (req, res) {
 			for(let link of payment.links){
 				if(link.rel === 'approval_url'){
 					console.log(payment)
-					/*let newOrder = new Order({
-						orderID             : paymentInformation.id,
-						username            : req.user.username,
-						address             : userAddress,
-						orderDate           : payment.create_time,
-						shipping            : true
-					  });
-					newOrder.save();*/
-					////
 
 					res.redirect(link.href); //link to payment approve page
 				}
@@ -110,17 +105,19 @@ router.post('/checkout-process', function (req, res) {
 // GET checkout-success
 router.get('/checkout-success', ensureAuthenticated, function (req, res) {
 	console.log(`ROUTE: GET CHECKOUT-SUCCESS`);
-	
+
 	var paymentId = req.query.paymentId;
 	var payerId = { payer_id: req.query.PayerID };
-	
+
 	paypal.payment.execute(paymentId, payerId, function(error, payment){
 		if(error){
 			console.error(JSON.stringify(error));
-		} 
+		}
 		else {
 		//	console.log(payment.payer.payer_info.shipping_address)
-
+			req.session.cart = new Cart({});
+			var totalPrice = 0;
+			console.log(req.session)
 			addressObj = payment.payer.payer_info.shipping_address
 			addressString = `${addressObj.line1}, ${addressObj.city} ${addressObj.state} ${addressObj.country_code} ${addressObj.postal_code}`
 
@@ -133,9 +130,7 @@ router.get('/checkout-success', ensureAuthenticated, function (req, res) {
 			});
 		   newOrder.save();
 
-			var cart = new Cart({});
-			var totalPrice = 0;
-			res.render('checkoutSuccess', {title: 'Successful', containerWrapper: 'container', userFirstName: req.user.fullname})
+			res.render('checkoutSuccess', {title: 'Successful', containerWrapper: 'container', userFirstName: req.user.fullname, email: req.user.username})
 		}
 	});
 });
