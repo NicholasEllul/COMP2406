@@ -57,13 +57,15 @@ router.get('/', ensureAuthenticated, function (req, res, next) {
 // POST checkout-process
 router.post('/checkout-process', function (req, res) {
 	console.log(`ROUTE: POST CHECKOUT-PROGRESS`);
+	// Load the items from the cart
 	var cart = new Cart(req.session.cart);
 	let items = cart.generateArray();
 	var totalPrice = cart.totalPrice;
 
 	create_payment_json.transactions[0].item_list.items = []; //clear items in json
 
-	for(let item of items){ //set item info in create_payment_json
+	// Build the item objects to add to the create payment JSON
+	for(let item of items){ 
 		newItem = {};
 		newItem.name = item.item.title;
 		newItem.quantity = item.qty;
@@ -78,19 +80,16 @@ router.post('/checkout-process', function (req, res) {
 	console.log(create_payment_json);
 	console.log(create_payment_json.transactions[0].amount.total);
 	console.log(create_payment_json.transactions[0].item_list.items);
-	console.log("\n\n\n\n\n\n dilly dilly")
-	console.log( req.session)
 
+	
 	paypal.payment.create(create_payment_json, function (error, payment) { //create paypal payment
 
 		if (error) {
 			console.log(error);
-			console.log("\n\n\n\n\n\n")
-				console.log(payment);
 			console.log(error.response.details);
 			throw error;
 		} else {
-			console.log("Create Payment Response");
+
 			for(let link of payment.links){
 				if(link.rel === 'approval_url'){
 					console.log(payment)
@@ -106,21 +105,25 @@ router.post('/checkout-process', function (req, res) {
 router.get('/checkout-success', ensureAuthenticated, function (req, res) {
 	console.log(`ROUTE: GET CHECKOUT-SUCCESS`);
 
+	// Extract the ID's to excecute the payment
 	var paymentId = req.query.paymentId;
 	var payerId = { payer_id: req.query.PayerID };
 
+	// Excecute the prepared payment
 	paypal.payment.execute(paymentId, payerId, function(error, payment){
 		if(error){
 			console.error(JSON.stringify(error));
 		}
 		else {
-		//	console.log(payment.payer.payer_info.shipping_address)
+			// Empty the cart and reset the total price
 			req.session.cart = new Cart({});
 			var totalPrice = 0;
-			console.log(req.session)
+			
+			// Build the address string
 			addressObj = payment.payer.payer_info.shipping_address
 			addressString = `${addressObj.line1}, ${addressObj.city} ${addressObj.state} ${addressObj.country_code} ${addressObj.postal_code}`
 
+			// create the new order object
 			let newOrder = new Order({
 				orderID             : payment.cart,
 				username            : req.user.username,
@@ -128,8 +131,9 @@ router.get('/checkout-success', ensureAuthenticated, function (req, res) {
 				orderDate           : payment.create_time,
 				shipping            : true
 			});
+			// save the object to the DB
 		   newOrder.save();
-
+			// Load the success screen
 			res.render('checkoutSuccess', {title: 'Successful', containerWrapper: 'container', userFirstName: req.user.fullname, email: req.user.username})
 		}
 	});

@@ -84,13 +84,13 @@ var products = [
 mongoose.connect('mongodb://localhost/shoppingApp', function(err, db){
     if (err) throw err;
     console.log('Successfully connected to mongodb');
-
     clearDatabase();
 });
 
 function clearDatabase(){
     let modelCounter = 0;
-
+	
+	// For every model in the database, remove that models data
     for(let model of mongoose.modelNames()){
         console.log(model);
         mongoose.model(model).remove({},function(err){
@@ -100,6 +100,7 @@ function clearDatabase(){
             }
 
             console.log('Remove ' + model + ' succeeded.');
+			// Once ALL models have been removed then proceed with seeding
             if(modelCounter === mongoose.modelNames().length-1){
                 seedDatabase();
             }
@@ -118,6 +119,7 @@ function seedDatabase(){
 }
 
 function createUsers(){
+	// Loop through each user and save them to the database
     for(let i = 0; i < users.length; i++){
         User.createUser(users[i], function(err, user){
             if(err) throw err;
@@ -127,7 +129,8 @@ function createUsers(){
             if(i === users.length-1){
                 usersCreated = true;
             }
-
+			// Only exit if BOTH adding processes finish to keep things IDEMPOTENT!
+			// If this finishes first it wont exit. The other adding function will.
             if(usersCreated && productsCreated){
                 exit();
             }
@@ -136,17 +139,21 @@ function createUsers(){
 }
 
 function createProducts(){
+	// Loop through each product and save it to the database
     for (let i = 0; i < products.length; i++){
         products[i].save(function(err, product) {
             if(err) throw err;
 
             console.log("Created:");
             console.log(product);
-
+			
+			// Once all products have been saved mark this task as done
             if (i === products.length - 1){
                 productsCreated = true;
             }
 
+			// Only exit if BOTH adding processes finish to keep things IDEMPOTENT!
+			// If this finishes first it wont exit. The other adding function will.
             if(usersCreated && productsCreated){
                 exit();
             }
