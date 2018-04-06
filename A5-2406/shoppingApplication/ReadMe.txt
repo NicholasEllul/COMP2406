@@ -5,9 +5,9 @@ Nicholas Ellul - Student Number: 101064168
 Peter Khlopenkov - Student Number: 101072312
 
 Systems tested on:
-     MacOS v10.13.2 with Node v8.9.1 on Google Chrome browser
-     MacOS v10.12.6 with Node v8.9.1 on Google Chrome browser
-     Lubuntu v16.03 with Node 6.11.2 on Chromium web browser
+     MacOS v10.13.2 with Node v8.9.1
+     MacOS v10.12.6 with Node v8.9.1
+     Lubuntu v16.03 with Node 6.11.2
 
 Install: 
 	Run the command...
@@ -17,6 +17,13 @@ Launch:
 	Start the mongodb server by running...
 		sudo mongod
 		
+	TROUBLESHOOTING: ----------
+		* On my virtual machine, mongod wasn't working at first. To make it work I had to run the commands 
+			sudo chown `whoami` /tmp/mongodb-27017.sock
+		* then
+			sudo mkdir -p /data/db
+	---------------------------
+	
 	Then from the root, populate the database by running...
 		node seed/populate-for-startup.js
 		
