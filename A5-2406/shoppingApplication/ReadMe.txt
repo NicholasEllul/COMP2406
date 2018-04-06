@@ -1,3 +1,39 @@
+Student Readme Section 
+
+COMP 2406 Assignment 4
+Nicholas Ellul - Student Number: 101064168
+Peter Khlopenkov - Student Number: 101072312
+
+Systems tested on:
+     MacOS v10.13.2 with Node v8.9.1 on Google Chrome browser
+     MacOS v10.12.6 with Node v8.9.1 on Google Chrome browser
+     Lubuntu v16.03 with Node 6.11.2 on Chromium web browser
+
+Install: 
+	Run the command...
+		npm install
+
+Launch: 
+	Start the mongodb server by running...
+		sudo mongod
+		
+	Then from the root, populate the database by running...
+		node seed/populate-for-startup.js
+		
+	Then start the server by running...
+		npm start
+		
+Testing: 
+	visit http://localhost:3000/ to load the website
+	Log in using any of the users specified in the seed file.
+	One example user is...
+		username: admin@admin.com 
+		password: admin
+
+
+
+BELOW IS THE README CREATED BY THE ORIGINAL DEVELOPER
+
 To run this app you need a personal Paypal Account
 You can create on at paypal.com
 When you create the account you don't need to link a credit card or bank account at that
