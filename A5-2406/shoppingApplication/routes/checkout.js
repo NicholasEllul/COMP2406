@@ -87,7 +87,8 @@ router.post('/checkout-process', function (req, res) {
 		if (error) {
 			console.log(error);
 			console.log(error.response.details);
-			throw error;
+			req.flash('error_msg', 'An error occurred. You were not charged.');
+			res.redirect('/');
 		} else {
 
 			for(let link of payment.links){
