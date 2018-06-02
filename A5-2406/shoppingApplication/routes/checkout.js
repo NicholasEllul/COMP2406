@@ -8,8 +8,8 @@ let newItem
 //Paypal configuration
 paypal.configure({
 	'mode': 'sandbox', //sandbox or live
-	'client_id': 'Acj2PWk5WbziUhhT5pg8A8jMPJVW1SNcw1EdNwlfZw8dZHJw-pJm9NAd8RlacpRMsWUBLrZLroxxigQ2',
-	'client_secret': 'EEVbMoMbOHjbGwCY8_F3523LuIN4mSO8IYSFMhnebmqzi5o8J57RDaJf_ttFlIvv7uTiBC4mSRfamMsx'
+	'client_id': 'ADD YOUR OWN KEY HERE',
+	'client_secret': 'ADD YOUR OWN KEY HERE'
 });
 
 let create_payment_json = {
@@ -65,7 +65,7 @@ router.post('/checkout-process', function (req, res) {
 	create_payment_json.transactions[0].item_list.items = []; //clear items in json
 
 	// Build the item objects to add to the create payment JSON
-	for(let item of items){ 
+	for(let item of items){
 		newItem = {};
 		newItem.name = item.item.title;
 		newItem.quantity = item.qty;
@@ -81,7 +81,7 @@ router.post('/checkout-process', function (req, res) {
 	console.log(create_payment_json.transactions[0].amount.total);
 	console.log(create_payment_json.transactions[0].item_list.items);
 
-	
+
 	paypal.payment.create(create_payment_json, function (error, payment) { //create paypal payment
 
 		if (error) {
@@ -119,7 +119,7 @@ router.get('/checkout-success', ensureAuthenticated, function (req, res) {
 			// Empty the cart and reset the total price
 			req.session.cart = new Cart({});
 			var totalPrice = 0;
-			
+
 			// Build the address string
 			addressObj = payment.payer.payer_info.shipping_address
 			addressString = `${addressObj.line1}, ${addressObj.city} ${addressObj.state} ${addressObj.country_code} ${addressObj.postal_code}`
