@@ -1,0 +1,36 @@
+body {
+	background-color:gray;
+}
+
+form{
+	display:block;
+	text-align: center;
+	margin: 0 auto;
+}
+
+.recipe-container{
+	display: flex;
+	margin: 0 auto;
+	flex-flow: row wrap;
+	max-width: 1000px;
+}
+
+.recipe{
+	min-width: 100px;
+	text-align: center;
+	height: 200px;
+	background-size: cover;
+	background-repeat: no-repeat;
+	background-position: center center;
+	margin: 0 5px 5px 0;
+}
+a{
+	flex:auto;
+		text-decoration: none;
+}
+p{
+	background-color: black;
+	color: white;
+	font-family: "Roboto", "Helvetica Neue", Helvetica, Arial, sans-serif;
+	padding: 15px 0 15px;
+}

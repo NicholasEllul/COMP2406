@@ -1,0 +1,9 @@
+<% for(let i = 0; i < count; i ++){ %> 
+<a href=<%-recipes[i].f2f_url%> target="_blank">
+	
+	<div class="recipe" style="background-image: url(' <%- recipes[i].image_url%>')" >
+
+		<p> <%- recipes[i].title %> </p>
+	</div>
+</a>
+<% } %>
